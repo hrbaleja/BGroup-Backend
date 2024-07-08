@@ -21,8 +21,12 @@ const cors = require('cors');
 app.use(cors());
 app.use(express.json());
 
+// Root route
+app.get('/', (req, res) => {
+    res.send('Hello B group Pvt. Ltd');
+  });
 // Routes
-app.use('/api', apiRoutes);
+app.use('/api/v1', apiRoutes);
 
 // Error handler middleware
 app.use(errorMiddleware);
