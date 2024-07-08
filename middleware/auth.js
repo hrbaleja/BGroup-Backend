@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const User = require('../models/users/User');
 const errorHandler = require('../utils/errorHandler');
 
 exports.protect = async (req, res, next) => {
@@ -11,17 +11,17 @@ exports.protect = async (req, res, next) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       req.user = {
-        userId: decoded.userId,
+        Id: decoded.userId,
         role: decoded.role,
       };
 
       next();
     } catch (err) {
-      res.status(401).json({ msg: 'Invalid token' });
+      res.status(401).json({ message: 'Invalid token' });
     }
   }
 
   if (!token) {
-    res.status(401).json({ msg: 'No token, authorization denied' });
+    res.status(401).json({ message: 'No token, authorization denied' });
   }
 };

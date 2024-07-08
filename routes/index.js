@@ -1,34 +1,55 @@
-
 // this main route file 
 const express = require('express');
 const router = express.Router();
 
+// Authication Check
+const { protect } = require('../middleware/auth');
 
-// Import routes
-const transactionRoutes = require('./transactions');
-const companiesRoute = require('./companies');
-const taskRoutes = require('./task');
-const customersRoutes=require("./customers");
-const incomeRoutes = require('./income');
-const authRoutes = require('./auth');
-const companyController = require('../controllers/dashboardController');
-const profileRoutes = require('./profile');
-const informationRoutes = require('./information');
-const userRoutes=require('./user');
-const sectorRoutes = require('./sectorRoutes');
+// User Auth files
+const authRoutes = require('./auth/authRoutes');
 
-// Mount routes
+//  Overview routes files
+const dashboarRoutes = require('./overview/dashboardRoutes')
+const sectorRoutes = require('./overview/sectorRoutes');
+const taskRoutes = require('./overview/taskRoutes');
+
+// Bank routes files
+const accountRoutes = require("./bank/accountRoutes");
+
+// User routes files
+const profileRoutes = require('./users/profileRoutes');
+const credentialsRoutes = require('./users/credentialsRoutes');
+const userRoutes = require('./users/userRoutes');
+
+// Company routes files
+const companiesRoute = require('./company/companiesRoutes');
+const transactionRoutes = require('./company/transactionsRoutes');
+const incomeRoutes = require('./company/incomeRoutes');
+
+// Others
+const incomesRoutes = require('./others/incomeRoutes')
+// Auth
 router.use('/auth', authRoutes);
-router.use('/transactions', transactionRoutes);
-router.use('/companies', companiesRoute);
-router.use('/tasks', taskRoutes);
-router.use('/customers',customersRoutes)
-router.use('/income',incomeRoutes)
-router.use('/profile', profileRoutes);
-router.use('/financialinformation',informationRoutes)
-router.use('/users',userRoutes)
-router.use('/sectors', sectorRoutes);
 
-router.get('/company-statistics', companyController.getCompanyStatistics);
+// Overview
+router.use('/dashboardinfo', protect, dashboarRoutes)
+router.use('/sectors', protect, sectorRoutes);
+router.use('/tasks', protect, taskRoutes);
+
+// Bank
+router.use('/accounts', protect, accountRoutes);
+
+// User
+router.use('/users', protect, userRoutes);
+router.use('/profile', protect, profileRoutes);
+router.use('/credentials', protect, credentialsRoutes);
+
+// Company
+router.use('/companies', protect, companiesRoute);
+router.use('/transactions', protect, transactionRoutes);
+router.use('/income', protect, incomeRoutes);
+
+// other 
+router.use('/other/incomes', protect, incomesRoutes)
 
 module.exports = router;
