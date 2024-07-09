@@ -18,7 +18,13 @@ global.__basedir = path.resolve(__dirname);
 
 // Middleware
 const cors = require('cors');
-app.use(cors());
+const corsOptions = {
+  origin: 'https://bgroupltd.vercel.app',
+  optionsSuccessStatus: 200 
+};
+
+app.use(cors(corsOptions));
+
 app.use(express.json());
 
 // Root route
