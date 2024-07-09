@@ -1,6 +1,6 @@
-const Sector = require('@models/overview/Sector');
+const Sector = require('../../models/overview/Sector');
 const { STATUS, MESSAGES } = require('../../constants/overview');
-const ErrorHandler = require('@utils/errorHandler');
+const ErrorHandler = require('../../utils/errorHandler');
 
 exports.getAllSectors = async (req, res, next) => {
     try {

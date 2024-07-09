@@ -1,4 +1,4 @@
-const Credential = require('@models/users/Credential');
+const Credential = require('../../models/users/Credential');
 const errorHandler = require('../../utils/errorHandler');
 const { STATUS, MESSAGES } = require('../../constants/users');
 

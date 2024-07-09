@@ -1,5 +1,5 @@
-const Account = require('@models/bank/Account');
-const User = require('@models/users/User');
+const Account = require('../../models/bank/Account');
+const User = require('../../models/users/User');
 const { STATUS, MESSAGES, } = require('../../constants/bank');
 const ErrorHandler = require('../../utils/errorHandler');
 

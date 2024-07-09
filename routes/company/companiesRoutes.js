@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const companyController = require('@controllers/company/companyController');
+const companyController = require('../../controllers/company/companyController');
 
 router.use((req, res, next) => {
     req.isArchived = req.query.archiveStatus === 'yes';

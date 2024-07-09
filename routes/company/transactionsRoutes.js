@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const {protect}=require('@middleware/auth');
-const transactionController = require('@controllers/company/transactionController');
+const {protect}=require('../../middleware/auth');
+const transactionController = require('../../controllers/company/transactionController');
 
 
 // Create a new transaction

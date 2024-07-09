@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const incomeController = require('@controllers/company/incomeController');
+const incomeController = require('../../controllers/company/incomeController');
 
 // Income routes
 router.post('/', incomeController.createIncome);

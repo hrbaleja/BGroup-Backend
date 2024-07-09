@@ -1,7 +1,7 @@
-const Company = require('@models/company/Company');
-const Account = require('@models/bank/Account');
-const User = require('@models/users/User');
-const Transaction = require('@models/bank/Transaction');
+const Company = require('../../models/company/Company');
+const Account = require('../../models/bank/Account');
+const User = require('../../models/users/User');
+const Transaction = require('../../models/bank/Transaction');
 const { STATUS, MESSAGES } = require('../../constants/overview');
 const ErrorHandler = require('../../utils/errorHandler');
 

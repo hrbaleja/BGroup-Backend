@@ -1,7 +1,7 @@
 // routes/taskRoutes.js
 const express = require('express');
 const router = express.Router();
-const taskController = require('@controllers/overview/taskController');
+const taskController = require('../../controllers/overview/taskController');
 
 router.route('/')
   .get( taskController.getTasks)

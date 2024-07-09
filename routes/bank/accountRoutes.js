@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const accountController = require('@controllers/bank/accountController');
-const transactionController = require('@controllers/bank/transactionController');
+const accountController = require('../../controllers/bank/accountController');
+const transactionController = require('../../controllers/bank/transactionController');
 
 // Create a new account
 router.post('/', accountController.createAccount);
