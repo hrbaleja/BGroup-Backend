@@ -5,7 +5,6 @@ const errorHandler = require('./middleware/error');
 const apiRoutes = require('./routes/index');
 const errorMiddleware = require('./utils/errorMiddleware');
 
-
 // Load environment variables
 dotenv.config();
 
@@ -39,7 +38,6 @@ app.use('/api/v1', apiRoutes);
 app.use(errorMiddleware);
 
 app.use(errorHandler);
-
 
 const PORT = process.env.PORT || 5005;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
