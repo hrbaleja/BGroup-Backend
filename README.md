@@ -10,7 +10,8 @@
 
 5. Others
 
+Stucture : 
 1. Use Effect 
 2. Get Method
 3. Create Method
-Padination
+4. Pagination 

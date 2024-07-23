@@ -1,15 +1,15 @@
 // routes/taskRoutes.js
 const express = require('express');
 const router = express.Router();
-const taskController = require('../../controllers/overview/taskController');
+const TaskController = require('../../controllers/overview/taskController');
 
 router.route('/')
-  .get( taskController.getTasks)
-  .post(taskController.createTask);
+  .get( TaskController.getTasks)
+  .post(TaskController.createTask);
 
 router.route('/:id')
-  .put( taskController.updateTask)
-  .delete(taskController.deleteTask)
-  .get( taskController.getTasksByStatus);
+  .put( TaskController.updateTask)
+  .delete(TaskController.deleteTask)
+  .get( TaskController.getTasksByStatus);
 
 module.exports = router;

@@ -1,15 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const sectorController = require('../../controllers/overview/sectorContoller');
+const SectorController = require('../../controllers/overview/sectorContoller');
 
-router.get('/', sectorController.getAllSectors);
-router.post('/', sectorController.addOrUpdateSector);
+router.get('/', SectorController.getAllSectors);
+router.post('/', SectorController.addOrUpdateSector);
 
-router.get('/date/:date', sectorController.getSectorsForDate);
- router.get('/latest', sectorController.getLatestSectorValues);
-router.get('/:id', sectorController.getSectorById);
-router.put('/:id', sectorController.addOrUpdateSector);
-router.delete('/:id', sectorController.deleteSector);
-router.post('/update', sectorController.updateSectorValues);
+router.get('/date/:date', SectorController.getSectorsForDate);
+ router.get('/latest', SectorController.getLatestSectorValues);
+router.get('/:id', SectorController.getSectorById);
+router.put('/:id', SectorController.addOrUpdateSector);
+router.delete('/:id', SectorController.deleteSector);
+router.post('/update', SectorController.updateSectorValues);
 
 module.exports = router;

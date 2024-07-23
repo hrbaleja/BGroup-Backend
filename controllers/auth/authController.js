@@ -23,6 +23,8 @@ exports.register = async (req, res, next) => {
 };
 
 exports.login = async (req, res, next) => {
+  const userAgent = req.headers['user-agent'];
+  console.log(userAgent)
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email });

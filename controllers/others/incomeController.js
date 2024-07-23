@@ -6,7 +6,7 @@ const errorHandler = require('../../utils/errorHandler');
 // Create a new income entry
 exports.createIncome = async (req, res, next) => {
   try {
-    const {name, amount, method, description, category, date } = req.body;
+    const { name, amount, method, description, category, date } = req.body;
     const createdBy = req.user.Id;
 
     const income = new Income({
@@ -52,7 +52,7 @@ exports.createIncome = async (req, res, next) => {
   // Update an income entry
   exports.updateIncome = async (req, res, next) => {
     try {
-      const { name,amount, method, description, category, date } = req.body;
+      const { name, amount, method, description, category, date } = req.body;
       const updatedIncome = await Income.findOneAndUpdate(
         { _id: req.params.id, createdBy: req.user.Id },
         {
@@ -71,7 +71,7 @@ exports.createIncome = async (req, res, next) => {
       if (!updatedIncome) {
         return next(new errorHandler(MESSAGES.INCOME_NOTFOUND, STATUS.NOTFOUND));
       }
-      res.status(STATUS.OK).json({ message: MESSAGES.INCOME_UPDATED});
+      res.status(STATUS.OK).json({ message: MESSAGES.INCOME_UPDATED });
     } catch (err) {
       next(new errorHandler(MESSAGES.INCOME_ERR_UPDATE, STATUS.SERVER_ERROR));
     }
