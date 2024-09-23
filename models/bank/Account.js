@@ -11,6 +11,7 @@ const accountSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 }, { versionKey: false });
 
-const Account = mongoose.model('Account.Account', accountSchema);
+accountSchema.index({ user: 1 });
 
+const Account = mongoose.model('Account.Account', accountSchema);
 module.exports = Account;

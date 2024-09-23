@@ -23,7 +23,7 @@ exports.createTransaction = async (req, res, next) => {
             return next(new ErrorHandler(MESSAGES.TRANSACTION_EXISTS, STATUS.BAD_REQUEST));
         }
 
-        const amount = lotSize * companyDoc.amount * companyDoc.lotSize;
+        const amount = lotSize * companyDoc.amount ;
 
         const transaction = new Transaction({
             user, company, lotSize, appliedDate, grantedBy, amount, is_own, remarks, applicationNo, is_alloted,

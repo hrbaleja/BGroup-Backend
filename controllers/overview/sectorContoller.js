@@ -55,6 +55,7 @@ exports.updateSectorValues = async (req, res, next) => {
     try {
         const updates = req.body;
         const today = new Date();
+        // today.setDate(today.getDate() +1);
         today.setUTCHours(0, 0, 0, 0);
         const updateOperations = updates.map(update => ({
             updateOne: {

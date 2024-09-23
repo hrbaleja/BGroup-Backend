@@ -12,5 +12,5 @@ router.get("/getnoncustomer", accountController.getUsersWithoutAccount);
 
 router.post("/deposit", transactionController.deposit);
 router.post("/withdraw", transactionController.withdraw);
-router.get("/tr/:customerId", transactionController.getTransactions);
+router.get("/tr/:customerId", transactionController.getTransactionsd);
 module.exports = router;

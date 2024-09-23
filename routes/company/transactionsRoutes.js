@@ -18,7 +18,6 @@ router.get('/', protect, async (req, res, next) => {
 });
 
 router.get('/:id', protect, async (req, res, next) => {
- 
   transactionController.getTransactionById(req, res, next);
 });
 

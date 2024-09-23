@@ -2,12 +2,19 @@ const Company = require('../../models/company/Company');
 const { STATUS, MESSAGES } = require('../../constants/company');
 const ErrorHandler = require('../../utils/errorHandler');
 
-exports.getActiveCompanies = async (req, res, next) => {
+exports.getCompanies = async (req, res, next) => {
     try {
-        const oneMonthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-        const companies = await Company.find();
+        const { isArchived } = req;
+        let companies;
+        if (isArchived) {
+            const oneMonthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+            companies = await Company.find({ endDate: { $gte: oneMonthAgo } }).sort({ endDate: -1 });
+        } else {
+            companies = await Company.find().sort({ endDate: -1 });
+        }
         res.status(STATUS.OK).json(companies);
     } catch (err) {
+        console.error('Error:', err);
         next(new ErrorHandler(MESSAGES.COMPANY_ERR_FETCH, STATUS.BAD_REQUEST));
     }
 };
@@ -20,23 +27,6 @@ exports.findCompanyById = async (req, res, next) => {
         }
         res.status(STATUS.OK).json(company);
     } catch (err) {
-        next(new ErrorHandler(MESSAGES.COMPANY_ERR_FETCH, STATUS.BAD_REQUEST));
-    }
-};
-
-exports.getCompanies = async (req, res, next) => {
-    try {
-        const { isArchived } = req;
-        let companies;
-        if (isArchived) {
-            const oneMonthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-            companies = await Company.find({ endDate: { $gte: oneMonthAgo } });
-        } else {
-            companies = await Company.find();
-        }
-        res.status(STATUS.OK).json(companies);
-    } catch (err) {
-        console.error('Error:', err);
         next(new ErrorHandler(MESSAGES.COMPANY_ERR_FETCH, STATUS.BAD_REQUEST));
     }
 };

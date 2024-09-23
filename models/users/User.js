@@ -20,10 +20,11 @@ const userSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: false, required: true },
   updatedAt: { type: Date, default: Date.now },
   refreshToken:{type:String},
-  lastLoginTime: { type: Date }
-
+  lastLoginTime: { type: Date },
+  hasDematAccount: {    type: Boolean,    default: false,  },
 }, {
   versionKey: false
 });
+userSchema.index({ name: 'text' });
 
 module.exports = mongoose.model('User', userSchema);

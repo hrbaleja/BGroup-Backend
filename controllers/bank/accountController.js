@@ -69,7 +69,6 @@ exports.getAccounts = async (req, res, next) => {
 
     // Scenario 1: Name search
     if (name && name.trim() !== '') {
-      console.log("Name Method Call ")
       aggregationPipeline = [
         {
           $lookup: {
@@ -191,7 +190,6 @@ if (amountRange) {
     res.status(500).json({ message: 'An error occurred while fetching accounts', error: error.message });
   }
 };
-
 
 exports.getAccountsold = async (req, res, next) => {
   try {

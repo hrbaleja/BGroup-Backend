@@ -1,4 +1,5 @@
 const Company = require('../../models/company/Company');
+const IPOTransaction = require('../../models/company/Transaction');
 const Account = require('../../models/bank/Account');
 const User = require('../../models/users/User');
 const Transaction = require('../../models/bank/Transaction');
@@ -29,7 +30,7 @@ exports.getDashboardStatistics = async (req, res,next) => {
     const smeCompanyCount = companyCountStats.find(stat => stat.isMain === false)?.count || 0;
 
     // Aggregate to get total amount
-    const totalAmountResult = await Company.aggregate([
+    const totalAmountResult = await IPOTransaction.aggregate([
       {
         $group: {
           _id: null,
@@ -41,8 +42,9 @@ exports.getDashboardStatistics = async (req, res,next) => {
     const totalAmount = totalAmountResult.length > 0 ? totalAmountResult[0].amount : 0;
 
     // Aggregate to get user count
+    const dematuserCount= await User.countDocuments({ hasDematAccount: true });
+   
     const userCount = await User.countDocuments();
-
     const transactionAmount = await Transaction.aggregate([
       {
         $group: {
@@ -85,14 +87,16 @@ exports.getDashboardStatistics = async (req, res,next) => {
 
     let [{ creditBalance, debitBalance }] = bankBalance;
     const statistics = {
+      amount: totalAmount,
       mainCompany: mainCompanyCount,
       smeCompany: smeCompanyCount,
-      amount: totalAmount,
-      user: userCount,
+      dematuser :   dematuserCount,
+      companyData: companyData,
+      
+      transactionAmount: transactionAmount[0].amount,
       creditBalance: creditBalance,
       debitBalance: debitBalance,
-      companyData: companyData,
-      transactionAmount: transactionAmount[0].amount
+      user: userCount,
     };
 
     res.status(STATUS.OK).json(statistics);
