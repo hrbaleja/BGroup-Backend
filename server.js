@@ -17,12 +17,12 @@ global.__basedir = path.resolve(__dirname);
 
 // Middleware
 const cors = require('cors');
-const corsOptions = {
-  origin: 'https://bgroupltd.vercel.app',
-  optionsSuccessStatus: 200 
-};
+// const corsOptions = {
+//   origin: 'https://bgroupltd.vercel.app',
+//   optionsSuccessStatus: 200 
+// };
 
-app.use(cors(corsOptions));
+app.use(cors());
 
 app.use(express.json());
 
