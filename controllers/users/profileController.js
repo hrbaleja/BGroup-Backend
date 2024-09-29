@@ -2,7 +2,6 @@ const Profile = require('../../models/users/Profile');
 
 // Create a new profile
 exports.createProfile = async (req, res) => {
-  console.log("hello")
   try {
     const profile = await Profile.create(req.body);
     res.status(201).json(profile);

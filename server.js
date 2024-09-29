@@ -17,26 +17,17 @@ global.__basedir = path.resolve(__dirname);
 
 // Middleware
 const cors = require('cors');
-const corsOptions = {
-  origin: 'https://bgroupltd.vercel.app',
-  optionsSuccessStatus: 200 
-};
-
-app.use(cors(corsOptions));
-
+app.use(cors());
 app.use(express.json());
 
-// Root route
-app.get('/', (req, res) => {
-    res.send('Hello B group Pvt. Ltd');
-  });
-
 // Routes
+app.get('/', (req, res) => {
+    res.send('Welcome to my Node.js backend!');
+  });
 app.use('/api/v1', apiRoutes);
 
 // Error handler middleware
 app.use(errorMiddleware);
-
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5005;

@@ -24,7 +24,7 @@ exports.register = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
   const userAgent = req.headers['user-agent'];
-  console.log(userAgent)
+  // console.log(userAgent) -- For User Device and Browser
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email });
@@ -112,32 +112,3 @@ const generateTokens = async (user) => {
   await user.save();
   return { accessToken, refreshToken };
 };
-
-
-// // const crypto = require('crypto');
-
-// // Encrypt function
-// const encryptPassword = (password, encryptionKey) => {
-//     const cipher = crypto.createCipher('aes-256-cbc', encryptionKey);
-//     let encryptedPassword = cipher.update(password, 'utf8', 'hex');
-//     encryptedPassword += cipher.final('hex');
-//     return encryptedPassword;
-// };
-
-// // Decrypt function
-// const decryptPassword = (encryptedPassword, encryptionKey) => {
-//     const decipher = crypto.createDecipher('aes-256-cbc', encryptionKey);
-//     let decryptedPassword = decipher.update(encryptedPassword, 'hex', 'utf8');
-//     decryptedPassword += decipher.final('utf8');
-//     return decryptedPassword;
-// };
-
-// // Example usage
-// const originalPassword = 'myPassword123';
-// const encryptionKey = 'yourEncryptionKey';
-
-// const encryptedPassword = encryptPassword(originalPassword, encryptionKey);
-// console.log('Encrypted Password:', encryptedPassword);
-
-// const decryptedPassword = decryptPassword(encryptedPassword, encryptionKey);
-// console.log('Decrypted Password:', decryptedPassword);

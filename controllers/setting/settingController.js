@@ -1,7 +1,6 @@
 const ErrorLog = require('../../models/settings/ErrorLog');
 
 
-// Get company statistics
 exports.fetchErrorLogs = async (req, res,next) => {
   try {
     const errorLogs = await ErrorLog.find().sort({ timestamp: -1 }).limit(10).populate('user', 'name');

@@ -14,7 +14,7 @@ const sectorRoutes = require('./overview/sectorRoutes');
 const taskRoutes = require('./overview/taskRoutes');
 
 // Bank routes files
-const accountRoutes = require("./bank/accountRoutes");
+const accountRoutes = require("./account/accountRoutes");
 
 // User routes files
 const profileRoutes = require('./users/profileRoutes');

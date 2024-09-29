@@ -45,7 +45,6 @@ exports.getTransactions = async (req, res, next) => {
             .populate('grantedBy', 'name ');
         res.status(STATUS.OK).json(transactions);
     } catch (err) {
-        console.log(err)
         next(new ErrorHandler(MESSAGES.TRANSACTION_ERR_FETCH, STATUS.SERVER_ERROR));
     }
 };
@@ -87,7 +86,6 @@ exports.getTransactionBycompny = async (req, res, next) => {
 
 
 exports.updateTransaction = async (req, res, next) => {
-    console.log(req.params.id)
     try {
         const { lotSize, appliedDate, grantedBy, is_own, is_alloted, remarks, applicationNo } = req.body;
 
@@ -115,7 +113,6 @@ exports.updateTransaction = async (req, res, next) => {
         await transaction.save();
         res.status(STATUS.OK).json({ message: MESSAGES.TRANSACTION_UPDATED});
     } catch (err) {
-        console.log(err)
         next(new ErrorHandler(MESSAGES.TRANSACTION_ERR_UPDATE, STATUS.SERVER_ERROR));
     }
 };
