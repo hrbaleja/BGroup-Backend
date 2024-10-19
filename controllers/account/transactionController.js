@@ -246,3 +246,73 @@ exports.getTransactions = async (req, res, next) => {
     next(new ErrorHandler(MESSAGES.TRANSACTION_ERRGET, STATUS.SERVER_ERROR));
   }
 };
+
+exports.getTransactionsByDate = async (req, res, next) => {
+  try {
+
+    const { customerId, fromDate, toDate } = req.body;
+    // Validate customerId
+    if (!customerId) {
+      return res
+        .status(STATUS.BAD_REQUEST)
+        .json({ message: MESSAGES.ACCOUNT_REQUIRED });
+    }
+
+    // Validate date range
+    if (!fromDate || !toDate) {
+      return res
+        .status(STATUS.BAD_REQUEST)
+        .json({ message: 'fromDate and toDate are required.' });
+    }
+
+    // Validate customer existence
+    const customer = await Account.findById(customerId);
+    if (!customer) {
+      return res
+        .status(STATUS.NOTFOUND)
+        .json({ message: MESSAGES.ACCOUNT_NOTFOUND });
+    }
+
+    // Fetch transactions within the date range
+    const transactions = await Transaction.find({
+      customer: customerId,
+      createdAt: {
+        $gte: new Date(fromDate),
+        $lte: new Date(toDate),
+      },
+    }).sort({ createdAt: 1 });
+
+    let balance = 0;
+    const formattedTransactions = [];
+
+    // Format transaction data
+    for (const transaction of transactions) {
+      if (transaction.type === "withdrawal") {
+        balance -= transaction.amount;
+        formattedTransactions.push({
+          txnDate: transaction.createdAt,
+          description: transaction.description,
+          txnId: transaction._id,
+          debit: transaction.amount,
+          credit: null,
+          balance,
+        });
+      } else if (transaction.type === "deposit") {
+        balance += transaction.amount;
+        formattedTransactions.push({
+          txnDate: transaction.createdAt,
+          description: transaction.description,
+          txnId: transaction._id,
+          debit: null,
+          credit: transaction.amount,
+          balance,
+        });
+      }
+    }
+
+    const reversedTransactions = formattedTransactions.reverse();
+    res.json(reversedTransactions);
+  } catch (err) {
+    next(new ErrorHandler(MESSAGES.TRANSACTION_ERRGET, STATUS.SERVER_ERROR));
+  }
+};

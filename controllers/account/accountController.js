@@ -86,52 +86,52 @@ exports.getAccounts = async (req, res, next) => {
     else {
       const matchStage = {};
 
-if (balanceType) {
-  switch (balanceType) {
-    case "Credit":
-      matchStage.balance = { $gt: 0 };
-      break;
-    case "Debit":
-      matchStage.balance = { $lt: 0 };
-      break;
-    case "Zero":
-      matchStage.balance = 0;
-      break;
-  }
-}
+      if (balanceType) {
+        switch (balanceType) {
+          case "Credit":
+            matchStage.balance = { $gt: 0 };
+            break;
+          case "Debit":
+            matchStage.balance = { $lt: 0 };
+            break;
+          case "Zero":
+            matchStage.balance = 0;
+            break;
+        }
+      }
 
-// Amount range filter
-if (amountRange) {
-  switch (amountRange) {
-    case "below":
-      if (balanceType === "Credit") {
-        matchStage.balance = { ...(matchStage.balance || {}), $lt: 1000 };
-      } else if (balanceType === "Debit") {
-        matchStage.balance = { ...(matchStage.balance || {}), $gt: -1000 };
-      } else if (!balanceType) {
-        matchStage.balance = { $lt: 1000,$gte:0};
+      // Amount range filter
+      if (amountRange) {
+        switch (amountRange) {
+          case "below":
+            if (balanceType === "Credit") {
+              matchStage.balance = { ...(matchStage.balance || {}), $lt: 1000 };
+            } else if (balanceType === "Debit") {
+              matchStage.balance = { ...(matchStage.balance || {}), $gt: -1000 };
+            } else if (!balanceType) {
+              matchStage.balance = { $lt: 1000, $gte: 0 };
+            }
+            break;
+          case "between":
+            if (balanceType === "Credit") {
+              matchStage.balance = { ...(matchStage.balance || {}), $gte: 1000, $lte: 5000 };
+            } else if (balanceType === "Debit") {
+              matchStage.balance = { ...(matchStage.balance || {}), $gte: -5000, $lte: -1000 };
+            } else if (!balanceType) {
+              matchStage.balance = { $gte: 1000, $lte: 5000, };
+            }
+            break;
+          case "above":
+            if (balanceType === "Credit") {
+              matchStage.balance = { ...(matchStage.balance || {}), $gt: 5000 };
+            } else if (balanceType === "Debit") {
+              matchStage.balance = { ...(matchStage.balance || {}), $lt: -5000 };
+            } else if (!balanceType) {
+              matchStage.balance = { $gt: 5000, };
+            }
+            break;
+        }
       }
-      break;
-    case "between":
-      if (balanceType === "Credit") {
-        matchStage.balance = { ...(matchStage.balance || {}), $gte: 1000, $lte: 5000 };
-      } else if (balanceType === "Debit") {
-        matchStage.balance = { ...(matchStage.balance || {}), $gte: -5000, $lte: -1000 };
-      } else if (!balanceType) {
-        matchStage.balance = { $gte: 1000, $lte: 5000,};
-      }
-      break;
-    case "above":
-      if (balanceType === "Credit") {
-        matchStage.balance = { ...(matchStage.balance || {}), $gt: 5000 };
-      } else if (balanceType === "Debit") {
-        matchStage.balance = { ...(matchStage.balance || {}), $lt: -5000 };
-      } else if (!balanceType) {
-        matchStage.balance = { $gt: 5000, };
-      }
-      break;
-  }
-}
       aggregationPipeline = [
         {
           $lookup: {

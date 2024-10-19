@@ -6,10 +6,13 @@ const transactionController = require("../../controllers/account/transactionCont
 // Create a new account
 router.post("/", accountController.createAccount);
 router.get("/", accountController.getAccounts);
+router.get("/drop", accountController.getAccountsd);
 router.get("/getnoncustomer", accountController.getUsersWithoutAccount);
 
 // Transaction routes
 router.post("/deposit", transactionController.deposit);
 router.post("/withdraw", transactionController.withdraw);
-router.get("/tr/:customerId", transactionController.getTransactionsd);
+router.get("/transactions/:customerId", transactionController.getTransactionsd);
+router.post('/filter',transactionController.getTransactionsByDate)
+
 module.exports = router;

@@ -27,10 +27,14 @@ const transactionRoutes = require('./company/transactionsRoutes');
 const incomeRoutes = require('./company/incomeRoutes');
 
 // Others
-const incomesRoutes = require('./others/incomeRoutes')
+const incomesRoutes = require('./others/incomeRoutes');
 
 // Setting 
-const settingRoutes = require('./setting/settingRoutes')
+const settingRoutes = require('./setting/settingRoutes');
+
+// Public 
+const publicRoutes = require('./public/publicRoutes');
+
 // Auth
 router.use('/auth', authRoutes);
 
@@ -57,5 +61,10 @@ router.use('/other/incomes', protect, incomesRoutes)
 
 // setting
 router.use('/setting', protect, settingRoutes)
+
+// Public
+router.use('/inovice', publicRoutes)
+
+
 
 module.exports = router;
