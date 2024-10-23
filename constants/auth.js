@@ -16,7 +16,7 @@ module.exports = {
     UNAUTHORIZED: 'Unauthorized Request',
     FORBIDDEN: 'Request Forbidden',
     SERVER_ERROR: 'Server error',
-    TOKEN_MISSING: 'Unauthorized: Refresh token missing or invalid',
+    TOKEN_MISSING: 'Unauthorized: Auth token missing or invalid',
     TOKEN_ERR: 'Failed to generate token. Please try again.',
     LOGIN_SUCCESS: 'Loggin successfully',
     LOGIN_ERR: 'Failed to login. Please try again.',

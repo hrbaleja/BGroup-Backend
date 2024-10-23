@@ -1,26 +1,63 @@
 const Account = require("../../models/account/Account");
 const Transaction = require("../../models/account/Transaction");
-const { STATUS, MESSAGES, } = require("../../constants/bank");
+const { STATUS, MESSAGES, } = require("../../constants/auth");
 const ErrorHandler = require("../../utils/errorHandler");
-const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
+const SessionToken = require("../../models/auth/SessionToken");
 
-exports.getTransactions = async (req, res, next) => {
+exports.genrateSessionToken = async (req, res, next) => {
   try {
-    const { customerId } = req.params;
+    const { customerId } = req.body;
     if (!customerId) {
       return res
         .status(STATUS.BAD_REQUEST)
         .json({ message: MESSAGES.ACCOUNT_REQUIRED });
     }
+    
     const customer = await Account.findById(customerId);
     if (!customer) {
       return res
         .status(STATUS.NOTFOUND)
         .json({ message: MESSAGES.ACCOUNT_NOTFOUND });
     }
+
+    // Create a unique session token ID
+    const sessionTokenId = uuidv4();
+
+    // Store the session token ID in the database
+    const sessionToken = new SessionToken({
+      tokenId: sessionTokenId,
+      customerId,
+      createdAt: new Date(),
+    });
+
+    const savedSessionToken = await sessionToken.save();
+    const TokenId = savedSessionToken._id;
+    res.json({ TokenId });
+  } catch (err) {
+    next(new ErrorHandler(err, STATUS.SERVER_ERROR));
+  }
+};
+
+exports.verifySessionToken = async (req, res, next) => {
+  try {
+    const { sessionId } = req.params;
+    if (!sessionId) {
+      return res.status(STATUS.UNAUTHORIZED).json({ message: MESSAGES.TOKEN_MISSING });
+    }
+
+    // Check the database for the session token ID
+    const session = await SessionToken.findById(sessionId);
+    if (!session) {
+      return res.status(STATUS.UNAUTHORIZED).json({ message: MESSAGES.TOKEN_MISSING });
+    }
+
+    const customerId = session.customerId; 
     const transactions = await Transaction.find({ customer: customerId }).sort({ createdAt: 1 });
+    
     let balance = 0;
     const formattedTransactions = [];
+
     for (const transaction of transactions) {
       if (transaction.type === "withdrawal") {
         balance -= transaction.amount;
@@ -44,31 +81,10 @@ exports.getTransactions = async (req, res, next) => {
         });
       }
     }
+
     const reversedTransactions = formattedTransactions.reverse();
     res.json(reversedTransactions);
   } catch (err) {
-    next(new ErrorHandler(MESSAGES.TRANSACTION_ERRGET, STATUS.SERVER_ERROR));
-  }
-};
-
-exports.getTransactionsd = async (req, res, next) => {
-  try {
-    const { customerId } = req.body;
-    if (!customerId) {
-      return res
-        .status(STATUS.BAD_REQUEST)
-        .json({ message: MESSAGES.ACCOUNT_REQUIRED });
-    }
-    const customer = await Account.findById(customerId);
-    if (!customer) {
-      return res
-        .status(STATUS.NOTFOUND)
-        .json({ message: MESSAGES.ACCOUNT_NOTFOUND });
-    }
-    const payload = { customerId };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRY });
-    res.json(token);
-  } catch (err) {
-    next(new ErrorHandler(MESSAGES.TRANSACTION_ERRGET, STATUS.SERVER_ERROR));
+    next(new ErrorHandler(err, STATUS.SERVER_ERROR));
   }
 };
