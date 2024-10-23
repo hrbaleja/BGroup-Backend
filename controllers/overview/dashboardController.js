@@ -3,70 +3,97 @@ const IPOTransaction = require('../../models/company/Transaction');
 const Account = require('../../models/account/Account');
 const User = require('../../models/users/User');
 const Transaction = require('../../models/account/Transaction');
+const IPOIncome = require('../../models/company/Income');
 const { STATUS, MESSAGES } = require('../../constants/overview');
 const ErrorHandler = require('../../utils/errorHandler');
 
-// Get company statistics
-exports.getDashboardStatistics = async (req, res,next) => {
+// Helper function to safely execute aggregation
+const safeAggregation = async (model, pipeline) => {
   try {
-    // Aggregate to get main and sme company counts
-    const companyCountStats = await Company.aggregate([
-      {
-        $group: {
-          _id: '$isMain',
-          count: { $sum: 1 },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          isMain: '$_id',
-          count: 1,
-        },
-      },
-    ]);
+    const result = await model.aggregate(pipeline);
+    return result.length > 0 ? result[0] : null;
+  } catch (error) {
+    console.error(`Aggregation failed for ${model.modelName}:`, error);
+    return null;
+  }
+};
 
-    const mainCompanyCount = companyCountStats.find(stat => stat.isMain === true)?.count || 0;
-    const smeCompanyCount = companyCountStats.find(stat => stat.isMain === false)?.count || 0;
+// Helper function to get total amount
+const getTotalAmount = async (model, field = 'amount') => {
+  const pipeline = [
+    {
+      $group: {
+        _id: null,
+        total: { $sum: `$${field}` }
+      }
+    }
+  ];
+  const result = await safeAggregation(model, pipeline);
+  return result?.total || 0;
+};
 
-    // Aggregate to get total amount
-    const totalAmountResult = await IPOTransaction.aggregate([
-      {
-        $group: {
-          _id: null,
-          amount: { $sum: '$amount' },
-        },
-      },
-    ]);
+exports.getDashboardStatistics = async (req, res, next) => {
+  try {
+    // Execute all queries concurrently for better performance
+    const [
+      companyStats,
+      ipoTransactionTotal,
+      ipoIncomeTotal,
+      userStats,
+      transactionTotal,
+      companyData,
+      bankBalance
+    ] = await Promise.all([
+      // Company statistics
+      Company.aggregate([
+        {
+          $group: {
+            _id: null,
+            mainCount: {
+              $sum: { $cond: [{ $eq: ['$isMain', true] }, 1, 0] }
+            },
+            smeCount: {
+              $sum: { $cond: [{ $eq: ['$isMain', false] }, 1, 0] }
+            }
+          }
+        }
+      ]),
 
-    const totalAmount = totalAmountResult.length > 0 ? totalAmountResult[0].amount : 0;
+      // IPO Transaction total
+      getTotalAmount(IPOTransaction),
 
-    // Aggregate to get user count
-    const dematuserCount= await User.countDocuments({ hasDematAccount: true });
-   
-    const userCount = await User.countDocuments();
-    const transactionAmount = await Transaction.aggregate([
-      {
-        $group: {
-          _id: null,
-          amount: { $sum: '$amount' },
-        },
-      },
-    ]);
+      // IPO Income total
+      getTotalAmount(IPOIncome, 'finalAmount'),
 
-    const companyData = await Company.find({}, { isMain: 1, endDate: 1 })
+      // User statistics
+      User.aggregate([
+        {
+          $group: {
+            _id: null,
+            totalUsers: { $sum: 1 },
+            dematUsers: {
+              $sum: { $cond: [{ $eq: ['$hasDematAccount', true] }, 1, 0] }
+            }
+          }
+        }
+      ]),
 
-    // Aggregate to get total credit and debit amounts
-    const bankBalance = await Account.aggregate(
-      [
+      // Transaction total
+      getTotalAmount(Transaction),
+
+      // Company data
+      Company.find({}, { isMain: 1, endDate: 1 }).lean(),
+
+      // Bank balance
+      Account.aggregate([
         {
           $group: {
             _id: null,
             creditBalance: {
               $sum: {
                 $cond: [
-                  { $gte: ["$balance", 0] },
-                  "$balance",
+                  { $gte: ['$balance', 0] },
+                  '$balance',
                   0
                 ]
               }
@@ -74,33 +101,38 @@ exports.getDashboardStatistics = async (req, res,next) => {
             debitBalance: {
               $sum: {
                 $cond: [
-                  { $lt: ["$balance", 0] },
-                  { $abs: "$balance" },
+                  { $lt: ['$balance', 0] },
+                  { $abs: '$balance' },
                   0
                 ]
               }
             }
           }
         }
-      ]
-    )
+      ])
+    ]);
 
-    let [{ creditBalance, debitBalance }] = bankBalance;
+    // Extract values with safe fallbacks
+    const { mainCount = 0, smeCount = 0 } = companyStats[0] || {};
+    const { totalUsers = 0, dematUsers = 0 } = userStats[0] || {};
+    const { creditBalance = 0, debitBalance = 0 } = bankBalance[0] || {};
+
     const statistics = {
-      amount: totalAmount,
-      mainCompany: mainCompanyCount,
-      smeCompany: smeCompanyCount,
-      dematuser :   dematuserCount,
-      companyData: companyData,
-      
-      transactionAmount: transactionAmount[0].amount,
-      creditBalance: creditBalance,
-      debitBalance: debitBalance,
-      user: userCount,
+      amount: ipoTransactionTotal,
+      mainCompany: mainCount,
+      smeCompany: smeCount,
+      dematuser: dematUsers,
+      companyData,
+      incomeAmount: ipoIncomeTotal,
+      transactionAmount: transactionTotal,
+      creditBalance,
+      debitBalance,
+      user: totalUsers,
     };
 
     res.status(STATUS.OK).json(statistics);
-  } catch (err) {
+  } catch (error) {
+    console.error('Dashboard statistics error:', error);
     next(new ErrorHandler(MESSAGES.STATISTICS_ERR_FETCH, STATUS.SERVER_ERROR));
   }
 };

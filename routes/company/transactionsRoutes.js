@@ -21,6 +21,10 @@ router.get('/:id', protect, async (req, res, next) => {
   transactionController.getTransactionById(req, res, next);
 });
 
+router.get('/company/:id', protect, async (req, res, next) => {
+   transactionController.getTransactionBycompny(req, res, next);
+ });
+ 
 // Update a transaction
 router.put('/:id', protect, async (req, res, next) => {
    transactionController.updateTransaction(req, res, next);

@@ -23,7 +23,7 @@ exports.createTransaction = async (req, res, next) => {
             return next(new ErrorHandler(MESSAGES.TRANSACTION_EXISTS, STATUS.BAD_REQUEST));
         }
 
-        const amount = lotSize * companyDoc.amount ;
+        const amount = lotSize * companyDoc.amount;
 
         const transaction = new Transaction({
             user, company, lotSize, appliedDate, grantedBy, amount, is_own, remarks, applicationNo, is_alloted,
@@ -31,7 +31,7 @@ exports.createTransaction = async (req, res, next) => {
         });
 
         await transaction.save();
-        res.status(STATUS.CREATED).json({ message: MESSAGES.TRANSACTION_CREATED});
+        res.status(STATUS.CREATED).json({ message: MESSAGES.TRANSACTION_CREATED });
     } catch (err) {
         next(new ErrorHandler(MESSAGES.TRANSACTION_ERR_CREATE, STATUS.SERVER_ERROR));
     }
@@ -64,7 +64,7 @@ exports.getTransactionById = async (req, res, next) => {
 
 exports.getTransactionBycompny = async (req, res, next) => {
     const { id } = req.params;
-    
+
     if (!id) {
         return next(new ErrorHandler(MESSAGES.COMPANY_ID_REQUIRED, STATUS.BAD_REQUEST));
     }
@@ -77,6 +77,7 @@ exports.getTransactionBycompny = async (req, res, next) => {
 
         const transactions = await Transaction.find({ company: id }).sort({ createdAt: -1 })
             .populate('user', 'name ')
+            .populate('company', 'name ')
             .populate('grantedBy', 'name ');
         res.status(STATUS.OK).json(transactions);
     } catch (err) {
@@ -111,7 +112,7 @@ exports.updateTransaction = async (req, res, next) => {
         transaction.updatedAt = Date.now();
 
         await transaction.save();
-        res.status(STATUS.OK).json({ message: MESSAGES.TRANSACTION_UPDATED});
+        res.status(STATUS.OK).json({ message: MESSAGES.TRANSACTION_UPDATED });
     } catch (err) {
         next(new ErrorHandler(MESSAGES.TRANSACTION_ERR_UPDATE, STATUS.SERVER_ERROR));
     }

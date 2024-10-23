@@ -4,7 +4,7 @@
   "description": "A robust backend server designed for financial transaction management. It offers secure and scalable APIs for user authentication, transaction processing, and data management, built according to industry best practices to ensure compliance with financial regulations and data protection standards.",
   "main": "server.js",
   "scripts": {
-    "start": "nodemon server.js",
+    "start": "nodemon server.js --host=10.0.1.218",
     "dev": "nodemon server.js",
     "build": "webpack",
     "startb": "node dist/bundle.js"
