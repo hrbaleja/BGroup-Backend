@@ -16,7 +16,6 @@ const errorLogSchema = new mongoose.Schema({
   },
   errorMessage: {
     type: String,
-   
   },
   errorStack: {
     type: String,
@@ -26,6 +25,7 @@ const errorLogSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
-});
+},
+  { versionKey: false });
 
 module.exports = mongoose.model('Setting.ErrorLog', errorLogSchema);
