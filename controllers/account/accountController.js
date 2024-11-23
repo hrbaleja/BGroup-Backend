@@ -34,7 +34,9 @@ exports.getAccountsd = async (req, res, next) => {
       balance: account.balance,
       _id: account._id,
     }));
-    res.status(STATUS.OK).json(accounts);
+    res.status(STATUS.OK).json({ message: MESSAGES.ACCOUNT_FETCHED, data: accounts });
+
+    // res.status(STATUS.OK).json(accounts);
   } catch (err) {
     next(new ErrorHandler(MESSAGES.ACCOUNT_ERRFET, STATUS.SERVER_ERROR));
   }
@@ -178,6 +180,7 @@ exports.getAccounts = async (req, res, next) => {
 
     res.status(200).json({
       accounts: formattedAccounts,
+      message: MESSAGES.ACCOUNT_FETCHED,
       pagination: {
         totalDocs,
         limit: Number(limit),
@@ -291,6 +294,7 @@ exports.getAccountsold = async (req, res, next) => {
     }));
 
     res.status(STATUS.OK).json({
+      message: MESSAGES.ACCOUNT_FETCHED,
       accounts,
       pagination: {
         currentPage: Number(page),

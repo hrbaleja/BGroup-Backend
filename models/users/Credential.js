@@ -8,7 +8,7 @@ const CredentialSchema = new Schema({
   username: { type: String, required: true },
   password: { type: String, required: true },
   description: { type: String, default: '' }
-});
+}, { versionKey: false });
 
 // Create a model based on schema
 const Credential = mongoose.model('User.Credential', CredentialSchema);

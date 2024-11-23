@@ -1,5 +1,6 @@
 const Account = require("../../models/account/Account");
 const Transaction = require("../../models/account/Transaction");
+const User = require('../../models/users/User');
 const { STATUS, MESSAGES, } = require("../../constants/auth");
 const ErrorHandler = require("../../utils/errorHandler");
 const { v4: uuidv4 } = require('uuid');
@@ -13,7 +14,7 @@ exports.genrateSessionToken = async (req, res, next) => {
         .status(STATUS.BAD_REQUEST)
         .json({ message: MESSAGES.ACCOUNT_REQUIRED });
     }
-    
+
     const customer = await Account.findById(customerId);
     if (!customer) {
       return res
@@ -28,6 +29,7 @@ exports.genrateSessionToken = async (req, res, next) => {
     const sessionToken = new SessionToken({
       tokenId: sessionTokenId,
       customerId,
+      userId: customer.user,
       createdAt: new Date(),
     });
 
@@ -52,9 +54,9 @@ exports.verifySessionToken = async (req, res, next) => {
       return res.status(STATUS.UNAUTHORIZED).json({ message: MESSAGES.TOKEN_MISSING });
     }
 
-    const customerId = session.customerId; 
+    const customerId = session.customerId;
     const transactions = await Transaction.find({ customer: customerId }).sort({ createdAt: 1 });
-    
+
     let balance = 0;
     const formattedTransactions = [];
 
@@ -83,7 +85,14 @@ exports.verifySessionToken = async (req, res, next) => {
     }
 
     const reversedTransactions = formattedTransactions.reverse();
-    res.json(reversedTransactions);
+
+    const userId = session.userId;
+    const user = await User.findById(userId).select('name email -_id'); 
+    const publicdata = {
+      transactionsData: reversedTransactions,
+      userdata: user,
+    };
+    res.status(200).json({ message: 'Success', data: publicdata });
   } catch (err) {
     next(new ErrorHandler(err, STATUS.SERVER_ERROR));
   }
