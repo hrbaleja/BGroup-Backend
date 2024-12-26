@@ -37,12 +37,6 @@ exports.createTransaction = async (req, res, next) => {
     }
 };
 
-const searchQuery = {
-    $or: [
-      { 'user.name': { $regex: search, $options: 'i' } },
-      { 'company.name': { $regex: search, $options: 'i' } }
-    ]
-  };
 
 // Use it in your controller like this
 exports.getTransactions = async (req, res, next) => {
