@@ -37,14 +37,73 @@ exports.createTransaction = async (req, res, next) => {
     }
 };
 
+const searchQuery = {
+    $or: [
+      { 'user.name': { $regex: search, $options: 'i' } },
+      { 'company.name': { $regex: search, $options: 'i' } }
+    ]
+  };
+
+// Use it in your controller like this
 exports.getTransactions = async (req, res, next) => {
     try {
-        const transactions = await Transaction.find()
-            .populate('user', 'name ')
-            .populate('company', 'name ')
-            .populate('grantedBy', 'name ');
-        res.status(STATUS.OK).json(transactions);
+        const page = parseInt(req.query.page, 10) || 1;
+        const limit = parseInt(req.query.limit, 10) || 10;
+        const search = req.query.search || '';
+        const sortBy = req.query.sortBy || 'appliedDate';
+        const order = req.query.order || 'desc';
+
+        const skip = (page - 1) * limit;
+
+        // Build sort object
+        const sortObject = {};
+        sortObject[sortBy] = order === 'desc' ? -1 : 1;
+
+        // First populate the fields, then apply the search
+        const query = Transaction.find()
+            .populate('user', 'name email')
+            .populate('company', 'name')
+            .populate('grantedBy', 'name');
+
+        // If search term exists, add the search conditions
+        if (search) {
+            query.where({
+                $or: [
+                    { 'user.name': { $regex: search, $options: 'i' } },
+                    { 'company.name': { $regex: search, $options: 'i' } }
+                ]
+            });
+        }
+
+        // Execute the query with pagination and sorting
+        const transactions = await query
+            .sort(sortObject)
+            .skip(skip)
+            .limit(limit);
+
+        // Get total count for pagination
+        const totalCount = await Transaction.countDocuments(search ? searchQuery : {});
+
+        // Calculate pagination metadata
+        const totalPages = Math.ceil(totalCount / limit);
+        const hasNextPage = page < totalPages;
+        const hasPrevPage = page > 1;
+
+        res.status(STATUS.OK).json({
+            success: true,
+            data: transactions,
+            pagination: {
+                total: totalCount,
+                totalPages,
+                currentPage: page,
+                limit,
+                hasNextPage,
+                hasPrevPage
+            }
+        });
+
     } catch (err) {
+        console.error('Transaction fetch error:', err);
         next(new ErrorHandler(MESSAGES.TRANSACTION_ERR_FETCH, STATUS.SERVER_ERROR));
     }
 };
