@@ -37,8 +37,6 @@ exports.createTransaction = async (req, res, next) => {
     }
 };
 
-
-// Use it in your controller like this
 exports.getTransactions = async (req, res, next) => {
     try {
         const page = parseInt(req.query.page, 10) || 1;
@@ -46,7 +44,6 @@ exports.getTransactions = async (req, res, next) => {
         const search = req.query.search || '';
         const sortBy = req.query.sortBy || 'appliedDate';
         const order = req.query.order || 'desc';
-
         const skip = (page - 1) * limit;
 
         // Build sort object
@@ -76,7 +73,16 @@ exports.getTransactions = async (req, res, next) => {
             .limit(limit);
 
         // Get total count for pagination
-        const totalCount = await Transaction.countDocuments(search ? searchQuery : {});
+        const totalCount = await Transaction.countDocuments(
+            search
+                ? {
+                    $or: [
+                        { 'user.name': { $regex: search, $options: 'i' } },
+                        { 'company.name': { $regex: search, $options: 'i' } },
+                    ],
+                }
+                : {}
+        );
 
         // Calculate pagination metadata
         const totalPages = Math.ceil(totalCount / limit);
@@ -97,7 +103,6 @@ exports.getTransactions = async (req, res, next) => {
         });
 
     } catch (err) {
-        console.error('Transaction fetch error:', err);
         next(new ErrorHandler(MESSAGES.TRANSACTION_ERR_FETCH, STATUS.SERVER_ERROR));
     }
 };

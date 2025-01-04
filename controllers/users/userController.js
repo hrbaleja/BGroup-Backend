@@ -11,9 +11,9 @@ exports.getAllUsers = async (req, res, next) => {
         if (role === 1 || role === 2) {
             let users;
             if (isDematUsers) {
-                 users = await User.find({hasDematAccount: true}, '-password');
+                users = await User.find({ hasDematAccount: true }, '-password').sort({ name: 1 });
             } else {
-                 users = await User.find({}, '-password');
+                users = await User.find({}, '-password').sort({ name: 1 });
             }
             res.status(STATUS.OK).json(users);
         } else {
@@ -27,14 +27,14 @@ exports.getAllUsers = async (req, res, next) => {
 exports.updateUser = async (req, res, next) => {
     try {
         const { userId } = req.params;
-        const { name, email, role,hasDematAccount } = req.body;
+        const { name, email, role, hasDematAccount } = req.body;
 
         const user = await User.findById(userId);
         if (!user) {
             return res.status(STATUS.NOT_FOUND).json({ error: MESSAGES.USER_NOT_FOUND });
         }
 
-        await User.findByIdAndUpdate(userId, { name, email, role,hasDematAccount }, { new: true });
+        await User.findByIdAndUpdate(userId, { name, email, role, hasDematAccount }, { new: true });
         res.status(STATUS.OK).json({ message: MESSAGES.USER_UPDATED });
     } catch (err) {
         next(new errorHandler(MESSAGES.ERROR_UPDATE_USER, STATUS.BAD_REQUEST));
