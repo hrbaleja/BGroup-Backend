@@ -3,11 +3,13 @@ const router = express.Router();
 const accountController = require("../../controllers/account/accountController");
 const transactionController = require("../../controllers/account/transactionController");
 
-// Create a new account
+//account routes
 router.post("/", accountController.createAccount);
 router.get("/", accountController.getAccounts);
-router.get("/drop", accountController.getAccountsd);
+router.get("/getallaccount", accountController.getAccountAll);
 router.get("/getnoncustomer", accountController.getUsersWithoutAccount);
+router.delete('/:accountId', accountController.deleteAccountAndTransactions);
+router.post('/sendmail', accountController.sendTransactionEmail);
 
 // Transaction routes
 router.post("/deposit", transactionController.deposit);

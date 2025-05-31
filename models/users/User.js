@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require('mongoose-paginate-v2');
 const Role = require('./Role');
 
 const userSchema = new mongoose.Schema({
@@ -12,9 +13,12 @@ const userSchema = new mongoose.Schema({
   refreshToken: { type: String },
   lastLoginTime: { type: Date },
   hasDematAccount: { type: Boolean, default: false, },
+  resetPasswordToken: { type: String }, 
+  resetPasswordExpires: { type: Date }, 
 }, {
   versionKey: false
 });
+userSchema.plugin(mongoosePaginate);
 userSchema.index({ name: 'text' });
 
 module.exports = mongoose.model('User', userSchema);

@@ -22,5 +22,8 @@ module.exports = {
     LOGIN_ERR: 'Failed to login. Please try again.',
     REGISTER_SUCCESS: 'Registration successful. Please log in.',
     REGISTER_ERR: 'Failed to register. Please try again.',
+    EMAIL_SENT: 'Email sent successfully!',
+    PASSWORD_RESET_SUCCESS: 'Password has been reset successfully',
+    RESET_LINKEXPIRED: 'This link has expired or Invalid Please request a new one.',
   }
 };

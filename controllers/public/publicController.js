@@ -5,6 +5,7 @@ const { STATUS, MESSAGES, } = require("../../constants/auth");
 const ErrorHandler = require("../../utils/errorHandler");
 const { v4: uuidv4 } = require('uuid');
 const SessionToken = require("../../models/auth/SessionToken");
+const { sendWhatsAppMessage, sendSMSMessage } = require("../../services/whatsappService");
 
 exports.genrateSessionToken = async (req, res, next) => {
   try {
@@ -37,6 +38,54 @@ exports.genrateSessionToken = async (req, res, next) => {
     const TokenId = savedSessionToken._id;
     res.json({ TokenId });
   } catch (err) {
+    next(new ErrorHandler(err, STATUS.SERVER_ERROR));
+  }
+};
+
+exports.genrateSessionTokenSMS = async (req, res, next) => {
+  try {
+    const { customerId } = req.body;
+    if (!customerId) {
+      return res
+        .status(STATUS.BAD_REQUEST)
+        .json({ message: MESSAGES.ACCOUNT_REQUIRED });
+    }
+
+    const customer = await Account.findById(customerId);
+    if (!customer) {
+      return res.status(STATUS.NOTFOUND).json({ message: MESSAGES.ACCOUNT_NOTFOUND });
+    }
+
+    // Create a unique session token ID
+    const sessionTokenId = uuidv4();
+
+    // Store the session token ID in the database
+    const sessionToken = new SessionToken({
+      tokenId: sessionTokenId,
+      customerId,
+      userId: customer.user,
+      createdAt: new Date(),
+    });
+
+    const savedSessionToken = await sessionToken.save();
+    const TokenId = savedSessionToken._id;
+
+    const phoneNumber = '+919664759611';
+    const shareUrl = `${process.env.APPURL}account/${TokenId}`;
+    const messageText = `🎉 Great news! Your account statement is ready! 🏦\n\nClick the link below to view your statement:\n\n🔗 ${shareUrl}\n\nWe appreciate your trust in us! Thank you for banking with us! 😊`;
+
+    // Send WhatsApp OR SMS message
+    const response = await sendWhatsAppMessage(phoneNumber, messageText);
+    //const response = await sendSMSMessage(phoneNumber, messageText);
+
+    if (response.success) {
+      return res.status(STATUS.OK).json({ success: true, TokenId, whatsappMessageSid: response.sid, });
+    }
+    else {
+      return res.status(STATUS.OK).json({ success: true, TokenId, whatsappStatus: 'failed', });
+    }
+  } catch (err) {
+    console.log(err)
     next(new ErrorHandler(err, STATUS.SERVER_ERROR));
   }
 };
@@ -87,7 +136,7 @@ exports.verifySessionToken = async (req, res, next) => {
     const reversedTransactions = formattedTransactions.reverse();
 
     const userId = session.userId;
-    const user = await User.findById(userId).select('name email -_id'); 
+    const user = await User.findById(userId).select('name email -_id');
     const publicdata = {
       transactionsData: reversedTransactions,
       userdata: user,

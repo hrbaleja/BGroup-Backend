@@ -1,7 +1,10 @@
 const Account = require("../../models/account/Account");
+const Transaction = require("../../models/account/Transaction");
 const User = require("../../models/users/User");
 const { STATUS, MESSAGES } = require("../../constants/bank");
 const ErrorHandler = require("../../utils/errorHandler");
+const nodemailers = require('nodemailer');
+const { sendEmail } = require("../../services/mailService");
 
 // Create a new account
 exports.createAccount = async (req, res, next) => {
@@ -21,7 +24,7 @@ exports.createAccount = async (req, res, next) => {
 };
 
 // Get all accounts
-exports.getAccountsd = async (req, res, next) => {
+exports.getAccountAll = async (req, res, next) => {
   try {
     const formattedAccounts = await Account.find().populate({
       path: "user",
@@ -194,116 +197,43 @@ exports.getAccounts = async (req, res, next) => {
   }
 };
 
-exports.getAccountsold = async (req, res, next) => {
+// Function to delete account and associated transactions
+exports.deleteAccountAndTransactions = async (req, res) => {
+  const { accountId } = req.params;
+
   try {
-    const {
-      page = 1,
-      limit = 10,
-      sortBy = "updatedAt",
-      sortOrder = "desc",
-      name,
-      balanceType,
-      amountRange,
-    } = req.query;
-    // Build the query
-    let query = {};
-    if (name) {
-      const nameRegex = new RegExp(name.split(/\s+/).join('|'), 'i');
-      query.$or = [
-        { name: nameRegex },
-        { 'user.name': nameRegex }
-      ];
+    const transactions = await Transaction.deleteMany({ customer: accountId });
+
+    const account = await Account.findOneAndDelete({ _id: accountId });
+
+    if (!account) {
+      return res.status(404).json({ message: 'Account not found' });
     }
 
-    if (balanceType && amountRange) {
-      switch (balanceType) {
-        case "Credit":
-          switch (amountRange) {
-            case "below":
-              query.balance = { $gt: 0, $lt: 1000 };
-              break;
-            case "between":
-              query.balance = { $gte: 1000, $lte: 5000 };
-              break;
-            case "above":
-              query.balance = { $gt: 5000 };
-              break;
-          }
-          break;
-        case "Debit":
-          switch (amountRange) {
-            case "below":
-              query.balance = { $lt: 0, $gt: -1000 };
-              break;
-            case "between":
-              query.balance = { $lte: -1000, $gte: -5000 };
-              break;
-            case "above":
-              query.balance = { $lt: -5000 };
-              break;
-          }
-          break;
-      }
-    } else if (balanceType) {
-      switch (balanceType) {
-        case "Credit":
-          query.balance = { $gt: 0 };
-          break;
-        case "Debit":
-          query.balance = { $lt: 0 };
-          break;
-        case "Zero":
-          query.balance = 0;
-          break;
-      }
-    } else if (amountRange) {
-      switch (amountRange) {
-        case "below":
-          query.balance = { $lt: 1000, $gt: 0 };
-          break;
-        case "between":
-          query.balance = { $gte: 1000, $lte: 5000 };
-          break;
-        case "above":
-          query.balance = { $gt: 5000 };
-          break;
-      }
-    }
-    // Count total documents for pagination
-    const totalDocs = await Account.countDocuments(
-      name ? { $text: { $search: name } } : query
-    );
-
-    // Fetch accounts with pagination and sorting
-    const formattedAccounts = await Account.find(
-      name ? { $text: { $search: name } } : query
-    )
-      .populate({
-        path: "user",
-        select: "name",
-      })
-      .sort({ [sortBy]: sortOrder === "desc" ? -1 : 1 })
-      .skip((page - 1) * limit)
-      .limit(Number(limit));
-
-    const accounts = formattedAccounts.map((account) => ({
-      name: account.user.name,
-      updatedAt: account.updatedAt,
-      balance: account.balance,
-      _id: account._id,
-    }));
-
-    res.status(STATUS.OK).json({
-      message: MESSAGES.ACCOUNT_FETCHED,
-      accounts,
-      pagination: {
-        currentPage: Number(page),
-        totalPages: Math.ceil(totalDocs / limit),
-        totalDocs,
-        limit: Number(limit),
-      },
+    return res.status(200).json({
+      message: `Account and all transactions for account ID ${accountId} have been deleted.`,
+      deletedTransactions: transactions.deletedCount,
     });
+  } catch (error) {
+    console.error('Error deleting account and transactions:', error);
+    return res.status(500).json({ message: 'An error occurred while deleting the account and transactions.' });
+  }
+};
+
+// Method to send email with transaction details
+exports.sendTransactionEmail = async (req, res, next) => {
+  const { to, subject, html } = req.body;
+  try {
+    // Call the sendEmail function from the service
+    const emailResult = await sendEmail(to, subject, html);
+
+    if (emailResult.success) {
+      res.status(200).json({ success: true, message: emailResult.message });
+    } else {
+      res.status(500).json({ success: false, message: emailResult.message, error: emailResult.error });
+    }
   } catch (err) {
-    next(new ErrorHandler(MESSAGES.ACCOUNT_ERRFET, STATUS.SERVER_ERROR));
+    console.error('Error in sending email:', err);
+    res.status(500).json({ success: false, message: 'Failed to send email', error: err.message });
   }
 };

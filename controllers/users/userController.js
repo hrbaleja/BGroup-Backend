@@ -6,15 +6,9 @@ const { STATUS, MESSAGES } = require('../../constants/users');
 exports.getAllUsers = async (req, res, next) => {
 
     try {
-        const { isDematUsers } = req;
         const role = req.user.role;
         if (role === 1 || role === 2) {
-            let users;
-            if (isDematUsers) {
-                users = await User.find({ hasDematAccount: true }, '-password').sort({ name: 1 });
-            } else {
-                users = await User.find({}, '-password').sort({ name: 1 });
-            }
+            const users = await User.find({}, '-password').sort({ name: 1 });
             res.status(STATUS.OK).json(users);
         } else {
             res.status(STATUS.FORBIDDEN).json({ error: MESSAGES.FORBIDDEN });
@@ -78,5 +72,43 @@ exports.updatePassword = async (req, res, next) => {
         res.status(STATUS.OK).json({ message: MESSAGES.USER_PASSWORD_UPDATED });
     } catch (err) {
         next(new errorHandler(MESSAGES.ERROR_UPDATE_PASSWORD, STATUS.BAD_REQUEST));
+    }
+};
+
+exports.getAllUsersPage = async (req, res, next) => {
+    try {
+        const role = req.user.role;
+        if (role === 1 || role === 2) {
+            const { page = 1, limit = 10, sortBy = 'name', sortOrder = 'asc', name, role: roleFilter, isVerified, isActive, hasDematAccount } = req.query;
+
+            const query = {};
+            if (name) query.name = { $regex: name, $options: 'i' };
+            if (roleFilter) query.role = { $in: roleFilter.split(',').map(Number) };
+            if (isVerified === 'true' || isVerified === 'false') {
+                query.isVerified = isVerified === 'true';
+            }
+
+            if (isActive === 'true' || isActive === 'false') {
+                query.isActive = isActive === 'true';
+            }
+
+            if (hasDematAccount === 'true' || hasDematAccount === 'false') {
+                query.hasDematAccount = hasDematAccount === 'true';
+            }
+
+            const options = {
+                page: parseInt(page, 10),
+                limit: parseInt(limit, 10),
+                sort: { [sortBy]: sortOrder === 'asc' ? 1 : -1 },
+                select: '-password'
+            };
+
+            const users = await User.paginate(query, options);
+            res.status(STATUS.OK).json(users);
+        } else {
+            res.status(STATUS.FORBIDDEN).json({ error: MESSAGES.FORBIDDEN });
+        }
+    } catch (err) {
+        next(new errorHandler(err, STATUS.BAD_REQUEST));
     }
 };
