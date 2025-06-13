@@ -26,6 +26,7 @@ exports.register = async (req, res, next) => {
 };
 
 exports.login = async (req, res, next) => {
+  const clientIp = getClientIp(req);
   const userIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   const userAgentString = req.headers['user-agent'];
   const userDevice = useragent.parse(userAgentString);
@@ -51,7 +52,7 @@ exports.login = async (req, res, next) => {
       return res.status(STATUS.BAD_REQUEST).json({ message: MESSAGES.ACCOUNT_NOTACTIVE });
     }
 
-  
+
     const { accessToken, refreshToken } = await generateTokens(user);
 
     res.cookie('refreshToken', refreshToken, {
@@ -67,14 +68,14 @@ exports.login = async (req, res, next) => {
 
     // Send login alert
     const loginDetails = {
-      ipAddress: userIp,
+      ipAddress: userIp + clientIp,
       device: userDevice.toString(),
       timestamp: new Date()
     };
-    
+
 
     // Send login alert asynchronously - don't wait for it
-    sendLoginAlert(user, loginDetails).catch(console.error);
+    // sendLoginAlert(user, loginDetails).catch(console.error);
 
     res.json({ accessToken, refreshToken, message: MESSAGES.LOGIN_SUCCESS });
   } catch (err) {
@@ -372,6 +373,15 @@ const sendLoginAlert = async (user, loginDetails) => {
     return false;
   }
 };
+
+function getClientIp(req) {
+  const xForwardedFor = req.headers['x-forwarded-for'];
+  if (xForwardedFor) {
+    const ips = xForwardedFor.split(',').map(ip => ip.trim());
+    return ips[0];
+  }
+  return req.connection.remoteAddress || req.socket.remoteAddress;
+}
 
 
 

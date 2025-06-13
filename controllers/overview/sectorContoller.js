@@ -21,7 +21,7 @@ exports.addOrUpdateSector = async (req, res, next) => {
             { name, value, date: sectorDate },
             { upsert: true, new: true, runValidators: true }
         );
-        res.status(STATUS.OK).json({ message: MESSAGES.SECTOR_ADDED_UPDATED});
+        res.status(STATUS.OK).json({ message: MESSAGES.SECTOR_ADDED_UPDATED });
     } catch (err) {
         next(new ErrorHandler(MESSAGES.SECTOR_ERR_ADD_UPDATE, STATUS.BAD_REQUEST));
     }
@@ -55,7 +55,6 @@ exports.updateSectorValues = async (req, res, next) => {
     try {
         const updates = req.body;
         const today = new Date();
-        // today.setDate(today.getDate() +1);
         today.setUTCHours(0, 0, 0, 0);
         const updateOperations = updates.map(update => ({
             updateOne: {

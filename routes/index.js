@@ -20,6 +20,7 @@ const accountRoutes = require("./account/accountRoutes");
 const profileRoutes = require('./users/profileRoutes');
 const credentialsRoutes = require('./users/credentialsRoutes');
 const userRoutes = require('./users/userRoutes');
+const contactRoutes = require('./users/contactRoutes');
 
 // Company routes files
 const companiesRoute = require('./company/companiesRoutes');
@@ -39,7 +40,7 @@ const publicRoutes = require('./public/publicRoutes');
 router.use('/auth', authRoutes);
 
 // Overview
-router.use('/dashboardinfo', protect, dashboarRoutes)
+router.use('/dashboardinfo',  dashboarRoutes)
 router.use('/sectors', protect, sectorRoutes);
 router.use('/tasks', protect, taskRoutes);
 
@@ -50,6 +51,7 @@ router.use('/accounts', protect, accountRoutes);
 router.use('/users', protect, userRoutes);
 router.use('/profile', protect, profileRoutes);
 router.use('/credentials', protect, credentialsRoutes);
+router.use('/contacts', protect, contactRoutes);
 
 // Company
 router.use('/companies', protect, companiesRoute);

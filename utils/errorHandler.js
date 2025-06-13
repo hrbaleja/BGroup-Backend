@@ -4,9 +4,9 @@ class ErrorHandler extends Error {
     this.statusCode = statusCode;
     this.controller = 'Unknown';
     this.method = 'Unknown';
-    
+
     Error.captureStackTrace(this, this.constructor);
-    
+
     // Extract controller (file name) and method names from the stack trace
     const stackLines = this.stack.split('\n');
     if (stackLines.length > 1) {

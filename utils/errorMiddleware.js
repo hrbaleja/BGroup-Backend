@@ -7,7 +7,7 @@ module.exports = (err, req, res, next) => {
   const errorLog = new ErrorLog({
     user: req.user ? req.user.Id : null,
     controller: err.controller,
-    method: err.method,
+    method: err.method || 'Unknown',
     errorMessage: err.message,
     errorStack: err.stack
   });
